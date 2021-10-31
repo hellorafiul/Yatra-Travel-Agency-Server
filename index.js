@@ -64,6 +64,11 @@ async function run() {
 }
 run().catch(console.dir);
 
+// test
+app.get('/hello', (req, res) => {
+  res.send('Hello this is test after deploying on heroku')
+})
+
 app.get('/', (req, res) => {
   res.send('Running server from crud')
 });
