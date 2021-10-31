@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }))
+// app.use(bodyParser.urlencoded({ extended: true }))
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.komfq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -20,15 +20,30 @@ async function run() {
   try {
     await client.connect();
     const CustomPackage = client.db("Yatra").collection("services");
+    const bookNow = client.db("Yatra").collection("order");
 
     // Adding Custom Package
     app.post("/addCustomPackage", async (req, res) => {
       const result = await CustomPackage.insertOne(req.body);
       res.send(result)
     })
+    // Order Now
+    app.post("/bookNowTest", async (req, res) => {
+      console.log(req.body)
+      const result = await bookNow.insertOne(req.body);
+      res.send(result)
+    })
+
+    // my bookings
+    // Load all packages in the service component 
+    app.get('/myBooking/:email', async (req, res) => {
+      const result = await bookNow.find({ email: req.params.email }).toArray()
+      res.send(result)
+    })
 
     // Load all packages in the service component 
     app.get('/productServices', async (req, res) => {
+      console.log('is it work?')
       const result = await CustomPackage.find({}).toArray()
       res.send(result)
     })
@@ -40,10 +55,17 @@ async function run() {
       res.send(result)
     })
 
-    // My order/packages
-    app.get('/bookNow/:email', async (req, res) => {
-      const result = await CustomPackage.find({ email: req.params.email }).toArray();
-      res.send(result)
+    // // My order/packages
+    // app.get('/bookNow/:email', async (req, res) => {
+    //   const result = await CustomPackage.find({ email: req.params.email }).toArray();
+    //   res.send(result)
+    // })
+    app.delete('/deleteOrder/:id', async (req, res) => {
+      // res.json({ _id: req.params.id })
+      // console.log({ _id: ObjectId(req.params.id) })
+      const result = await bookNow.deleteOne({ _id: ObjectId(req.params.id) });
+      console.log(result)
+      res.json(result)
     })
 
   } finally {
